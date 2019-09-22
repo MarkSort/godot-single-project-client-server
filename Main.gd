@@ -7,4 +7,4 @@ func _ready():
     if (buildType == "Server"):
         get_tree().change_scene("res://Server.tscn")
     else:
-        lug.lug("TODO menu")
+        get_tree().change_scene("res://TitleScreen.tscn")
