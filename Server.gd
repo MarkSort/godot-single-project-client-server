@@ -7,7 +7,7 @@ const game_scene = preload("res://Game.tscn")
 const player_scene = preload("res://PlayerOther.tscn")
 
 var delta_total = 0
-var tick = 0
+var tick = 1
 var players = {}
 
 var game

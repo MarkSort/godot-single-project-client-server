@@ -6,6 +6,7 @@ const SERVER_PORT = 1337
 const game_scene = preload("res://Game.tscn")
 const player_scene = preload("res://Player.tscn")
 
+var tick_last = 0
 var players = {}
 
 var game
@@ -45,14 +46,19 @@ func network_peer_disconnected(id):
     set_process(false)
 
 func network_peer_packet(id, packet):
-    var message = packet.get_string_from_ascii()
-    lug.lug("got message %s" % message)
-
-    var player_messages = message.split("|")
+    var player_messages = packet.get_string_from_ascii().split("|")
 
     var tick = player_messages[0]
     player_messages.remove(0)
-    lug.lug("tick %s" % tick)
+
+    if (tick < tick_last):
+        lug.lug("skipping old delayed message")
+        return
+
+    if (tick_last != 0 && tick >= tick_last + 1):
+        lug.lug("detected dropped or delayed message(s)")
+    
+    tick_last = tick
     
     for player_message in player_messages:
         var x = player_message.split(",")
