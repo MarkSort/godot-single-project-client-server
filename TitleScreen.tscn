@@ -52,6 +52,7 @@ text = "Host"
 margin_top = 70.0
 margin_right = 844.0
 margin_bottom = 110.0
+mouse_filter = 0
 custom_fonts/font = ExtResource( 4 )
 text = "Join"
 
@@ -59,6 +60,7 @@ text = "Join"
 margin_top = 140.0
 margin_right = 844.0
 margin_bottom = 180.0
+mouse_filter = 0
 custom_fonts/font = ExtResource( 4 )
 text = "Options"
 
@@ -70,4 +72,5 @@ mouse_filter = 0
 custom_fonts/font = ExtResource( 4 )
 text = "Quit"
 [connection signal="gui_input" from="VBoxContainer/MarginContainer/Options/Host" to="." method="_on_Host_gui_input"]
+[connection signal="gui_input" from="VBoxContainer/MarginContainer/Options/Join" to="." method="_on_Join_gui_input"]
 [connection signal="gui_input" from="VBoxContainer/MarginContainer/Options/Quit" to="." method="_on_Quit_gui_input"]
