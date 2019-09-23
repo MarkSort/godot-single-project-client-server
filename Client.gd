@@ -5,6 +5,7 @@ const SERVER_PORT = 1337
 
 const game_scene = preload("res://Game.tscn")
 const player_scene = preload("res://Player.tscn")
+const player_other_scene = preload("res://PlayerOther.tscn")
 
 var delta_accrued = 0
 var players = {}
@@ -80,13 +81,22 @@ func network_peer_packet(id, packet):
     
     tick_server = tick
     
+    var disconnected_players = players.keys()
+    
     for player_message in player_messages:
         var props = player_message.split(",")
         var player_id = int(props[0])
-        if (players.has(player_id)):
-            var x = float(props[1])
-            var z = float(props[2])
-            players[player_id].transform.origin = Vector3(x, 0, z)
+        if (!players.has(player_id)):
+            players[player_id] = player_other_scene.instance()
+            get_tree().get_root().add_child(players[player_id])
+        else:
+            disconnected_players.remove(disconnected_players.find(player_id))
+
+        players[player_id].transform.origin = Vector3(float(props[1]), 0, float(props[2]))
+        
+    for disconnected_player in disconnected_players:
+        get_tree().get_root().remove_child(players[disconnected_player])
+        players.remove(disconnected_player)
 
 func get_input_speed_and_direction():
     var speed = 0
