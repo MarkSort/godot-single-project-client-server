@@ -45,19 +45,26 @@ func _process(delta):
     if (ticks > 0): 
         var message = "%s,%s" % [tick_client, get_input_speed_and_direction()]
         
-        get_tree().multiplayer.send_bytes(message.to_ascii(), 0, NetworkedMultiplayerPeer.TRANSFER_MODE_UNRELIABLE)
+        get_tree().multiplayer.send_bytes(message.to_ascii(), 1, NetworkedMultiplayerPeer.TRANSFER_MODE_UNRELIABLE)
 
         tick_client += 1
 
 func network_peer_connected(id):
     lug.lug("client network_peer_connected peer_id %s" % id)
+
+    if (id != 1):
+        return
     
     set_process(true)
 
     game = game_scene.instance()
     get_tree().get_root().add_child(game)
     var player = player_scene.instance()
-    players[get_tree().multiplayer.get_network_unique_id()] = player
+
+    var player_id = get_tree().multiplayer.get_network_unique_id()
+    players[player_id] = player
+    lug.lug("joined as %s" % player_id)
+
     game.add_child(player)
     game.show()
 
@@ -73,11 +80,11 @@ func network_peer_packet(id, packet):
     player_messages.remove(0)
 
     if (tick < tick_server):
-        lug.lug("skipping old delayed message")
+        lug.lug("skipping old delayed message: %s < %s" % [tick, tick_server])
         return
 
     if (tick_server != 0 && tick > tick_server + 1):
-        lug.lug("detected dropped or delayed message(s)")
+        lug.lug("detected dropped or delayed message(s): %s > %s + 1" % [tick, tick_server])
     
     tick_server = tick
     
@@ -90,13 +97,13 @@ func network_peer_packet(id, packet):
             players[player_id] = player_other_scene.instance()
             get_tree().get_root().add_child(players[player_id])
         else:
-            disconnected_players.remove(disconnected_players.find(player_id))
+            disconnected_players.erase(player_id)
 
         players[player_id].transform.origin = Vector3(float(props[1]), 0, float(props[2]))
         
     for disconnected_player in disconnected_players:
         get_tree().get_root().remove_child(players[disconnected_player])
-        players.remove(disconnected_player)
+        players.erase(disconnected_player)
 
 func get_input_speed_and_direction():
     var speed = 0
