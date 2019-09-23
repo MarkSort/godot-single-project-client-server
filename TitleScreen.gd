@@ -14,7 +14,7 @@ func _on_Host_gui_input(event):
     get_tree().get_root().add_child(server)
     
     var player = player_scene.instance()
-    server.players[1] = {"node": player, "up": false, "down": false, "left": false, "right": false}
+    server.game.players[1] = {"node": player, "speed": 0, "move_dir": 0}
     server.game.add_child(player)
     server.game.show()
 
