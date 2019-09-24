@@ -61,6 +61,7 @@ func _unhandled_input(event):
         Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func update_mouse(relative):
+    if (Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED): return
 
     listener.player.rotate_y(-relative.x/700)
 
