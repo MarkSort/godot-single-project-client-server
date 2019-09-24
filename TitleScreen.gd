@@ -3,12 +3,16 @@ extends MarginContainer
 func _on_Host_gui_input(event):
     if (!is_clicked(event)): return
     
-    get_tree().change_scene("res://Host.tscn")
+    var result = get_tree().change_scene("res://Host.tscn")
+    if (result != OK):
+        lug.lug("could not change to Host scene: %s" % result)
 
 func _on_Join_gui_input(event):
     if (!is_clicked(event)): return
     
-    get_tree().change_scene("res://Client.tscn")
+    var result = get_tree().change_scene("res://Client.tscn")
+    if (result != OK):
+        lug.lug("could not change to Client scene: %s" % result)
     
 func _on_Quit_gui_input(event):
     if (!is_clicked(event)): return
