@@ -59,6 +59,8 @@ func _unhandled_input(event):
         update_mouse(event.relative)
     elif (event is InputEventKey && event.scancode == KEY_ESCAPE && event.is_pressed()):
         Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+    elif (event is InputEventMouseButton && Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED):
+        Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func update_mouse(relative):
     if (Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED): return
