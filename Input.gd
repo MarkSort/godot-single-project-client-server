@@ -56,6 +56,15 @@ func get_input_speed_and_direction():
 
 func _unhandled_input(event):
     if (event is InputEventMouseMotion):
-        listener.update_mouse(event.relative)
+        update_mouse(event.relative)
     elif (event is InputEventKey && event.scancode == KEY_ESCAPE && event.is_pressed()):
         Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+func update_mouse(relative):
+    listener.player.rotate_y(-lerp(0, 0.1, relative.x/10))
+
+    listener.player.camera.rotate_x(-lerp(0, 0.1, relative.y/10))
+    if (listener.player.camera.rotation.x < deg2rad(-90)):
+        listener.player.camera.rotation.x = deg2rad(-90)
+    elif (listener.player.camera.rotation.x > -.1):
+        listener.player.camera.rotation.x = -.1

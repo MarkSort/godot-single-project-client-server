@@ -38,12 +38,3 @@ func network_peer_connected(id):
 func update_input(speed, move_dir):
     server.game.players[1].speed = speed
     server.game.players[1].move_dir = move_dir
-
-func update_mouse(relative):
-    player.rotate_y(-lerp(0, 0.1, relative.x/10))
-
-    player.camera.rotate_x(-lerp(0, 0.1, relative.y/10))
-    if (player.camera.rotation.x < deg2rad(-90)):
-        player.camera.rotation.x = deg2rad(-90)
-    elif (player.camera.rotation.x > -.1):
-        player.camera.rotation.x = -.1

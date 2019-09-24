@@ -135,12 +135,3 @@ func update_input(tick, speed, move_dir):
 
     if (result != OK):
         lug.lug("error on send_bytes in Client: %s" % result)
-
-func update_mouse(relative):
-    player.rotate_y(-lerp(0, 0.1, relative.x/10))
-
-    player.camera.rotate_x(-lerp(0, 0.1, relative.y/10))
-    if (player.camera.rotation.x < deg2rad(-90)):
-        player.camera.rotation.x = deg2rad(-90)
-    elif (player.camera.rotation.x > -.1):
-        player.camera.rotation.x = -.1
