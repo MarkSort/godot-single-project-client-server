@@ -98,6 +98,7 @@ func network_peer_packet(id, packet):
     player.tick = tick
     player.speed = float(message[1])
     player.move_dir = float(message[2])
+    player.node.rotation.y = float(message[3])
 
 func network_peer_connected(id):
     lug.lug("server network_peer_connected peer_id %s" % id)

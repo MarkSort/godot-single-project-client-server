@@ -13,6 +13,7 @@ var tick_server = 0
 
 var game
 var input
+var player
 
 func _ready():
     set_process(false)
@@ -64,7 +65,7 @@ func network_peer_connected(id):
     
     game = game_scene.instance()
     get_tree().get_root().add_child(game)
-    var player = player_scene.instance()
+    player = player_scene.instance()
 
     var player_id = get_tree().multiplayer.get_network_unique_id()
     players[player_id] = player
@@ -127,10 +128,13 @@ func network_peer_packet(id, packet):
         players.erase(disconnected_player)
 
 func update_input(tick, speed, move_dir):
-    var message = "%s,%s,%s" % [tick, speed, move_dir]
+    var message = "%s,%s,%s,%s" % [tick, speed, move_dir, player.rotation.y]
     
     var result = get_tree().multiplayer.send_bytes(
         message.to_ascii(), 1, NetworkedMultiplayerPeer.TRANSFER_MODE_UNRELIABLE)
 
     if (result != OK):
         lug.lug("error on send_bytes in Client: %s" % result)
+
+func update_mouse(relative):
+    player.rotate_y(-lerp(0, 0.1, relative.x/10))

@@ -6,6 +6,7 @@ const server_scene = preload("res://Server.tscn")
 
 var input
 var server
+var player
 
 func _ready():
     server = server_scene.instance()
@@ -16,7 +17,7 @@ func _ready():
         lug.lug("Input could not connect event: %s" % result)
         return
     
-    var player = player_scene.instance()
+    player = player_scene.instance()
     server.game.players[1] = {"node": player, "speed": 0, "move_dir": 0}
     server.game.add_child(player)
     server.game.show()
@@ -37,3 +38,6 @@ func network_peer_connected(id):
 func update_input(speed, move_dir):
     server.game.players[1].speed = speed
     server.game.players[1].move_dir = move_dir
+
+func update_mouse(relative):
+    player.rotate_y(-lerp(0, 0.1, relative.x/10))

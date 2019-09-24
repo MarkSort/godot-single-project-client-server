@@ -53,3 +53,7 @@ func get_input_speed_and_direction():
         direction = 0
 
     return {"speed": speed, "move_dir": deg2rad(direction)}
+
+func _unhandled_input(event):
+    if event is InputEventMouseMotion:
+        listener.update_mouse(event.relative)
