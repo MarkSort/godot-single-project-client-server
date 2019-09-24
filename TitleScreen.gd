@@ -1,26 +1,15 @@
 extends MarginContainer
 
-const host_scene = preload("res://Host.tscn")
-const client_scene = preload("res://Client.tscn")
-
 func _on_Host_gui_input(event):
     if (!is_clicked(event)): return
     
-    hide()
-
-    lug.lug("Host Starting")
-    var host = host_scene.instance()
-    get_tree().get_root().add_child(host)
+    get_tree().change_scene("res://Host.tscn")
 
 func _on_Join_gui_input(event):
     if (!is_clicked(event)): return
     
-    hide()
+    get_tree().change_scene("res://Client.tscn")
     
-    lug.lug("Join Starting Client")
-    var client = client_scene.instance()
-    get_tree().get_root().add_child(client)
-
 func _on_Quit_gui_input(event):
     if (!is_clicked(event)): return
 
