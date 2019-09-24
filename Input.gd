@@ -61,9 +61,10 @@ func _unhandled_input(event):
         Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func update_mouse(relative):
-    listener.player.rotate_y(-lerp(0, 0.1, relative.x/10))
 
-    listener.player.camera.rotate_x(-lerp(0, 0.1, relative.y/10))
+    listener.player.rotate_y(-relative.x/700)
+
+    listener.player.camera.rotate_x(-relative.y/700)
     if (listener.player.camera.rotation.x < deg2rad(-90)):
         listener.player.camera.rotation.x = deg2rad(-90)
     elif (listener.player.camera.rotation.x > -.1):
