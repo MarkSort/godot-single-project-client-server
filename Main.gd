@@ -5,6 +5,10 @@ func _ready():
     lug.lug("Build type %s" % buildType)
     
     if (buildType == "Server"):
-        get_tree().change_scene("res://Server.tscn")
+        var result = get_tree().change_scene("res://Server.tscn")
+        if (result != OK):
+            lug.lug("could not change scene to Server %s" % result)
     else:
-        get_tree().change_scene("res://TitleScreen.tscn")
+        var result = get_tree().change_scene("res://TitleScreen.tscn")
+        if (result != OK):
+            lug.lug("could not change scene to TitleScreen %s" % result)

@@ -6,19 +6,29 @@ const SERVER_PORT = 1337
 const game_scene = preload("res://Game.tscn")
 const player_scene = preload("res://Player.tscn")
 const player_other_scene = preload("res://PlayerOther.tscn")
+const input_scene = preload("res://Input.tscn")
 
-var delta_accrued = 0
 var players = {}
-var tick_client = 1
 var tick_server = 0
 
 var game
+var input
 
 func _ready():
+    set_process(false)
+
     var peer = NetworkedMultiplayerENet.new()
-    get_tree().connect("network_peer_connected", self, "network_peer_connected")
-    get_tree().connect("network_peer_disconnected", self, "network_peer_disconnected")
-    get_tree().multiplayer.connect("network_peer_packet", self, "network_peer_packet")
+
+    if (OK != bulk_connect([
+        "network_peer_connected",
+        "network_peer_disconnected",
+        "network_peer_packet",
+ 
+       #client only
+        "connected_to_server",
+        "connection_failed",
+        "server_disconnected"
+    ])): return
 
     var result = peer.create_client(SERVER_IP, SERVER_PORT)
     if (result != OK):
@@ -27,27 +37,24 @@ func _ready():
 
     get_tree().set_network_peer(peer)
     
-    set_process(false)
-
     lug.lug("Client Ready")
 
-func _process(delta):
-    delta_accrued += delta
-    var ticks = 0
-    
-    while (delta_accrued > .1):
-        ticks += 1
-        delta_accrued -= .1
+func bulk_connect(signals):
+    var bulk_result = OK
+    for signal_name in signals:
+        var result
+        if (signal_name == "network_peer_packet"):
+            # why is this one different?
+            result = get_tree().multiplayer.connect(signal_name, self, signal_name)
+        else:
+            result = get_tree().connect(signal_name, self, signal_name)
 
-    if (ticks > 1):
-        lug.lug("more than 1 tick processed in single _process call")
+        if (result != OK):
+            lug.lug("error connecting signal '%s' in Server: %s" % [signal_name, result])
+            bulk_result = result
 
-    if (ticks > 0): 
-        var message = "%s,%s" % [tick_client, get_input_speed_and_direction()]
-        
-        get_tree().multiplayer.send_bytes(message.to_ascii(), 1, NetworkedMultiplayerPeer.TRANSFER_MODE_UNRELIABLE)
+    return bulk_result
 
-        tick_client += 1
 
 func network_peer_connected(id):
     lug.lug("client network_peer_connected peer_id %s" % id)
@@ -55,8 +62,6 @@ func network_peer_connected(id):
     if (id != 1):
         return
     
-    set_process(true)
-
     game = game_scene.instance()
     get_tree().get_root().add_child(game)
     var player = player_scene.instance()
@@ -68,12 +73,28 @@ func network_peer_connected(id):
     game.add_child(player)
     game.show()
 
+    input = input_scene.instance()
+    input.listener = self
+    input.include_tick = true
+    get_tree().get_root().add_child(input)
+
 func network_peer_disconnected(id):
     lug.lug("client network_peer_disconnected peer_id %s" % id)
     
-    set_process(false)
+    if (id == 1):
+        input.set_process(false)
+        
+func connected_to_server():
+    lug.lug("client connected_to_server")
+
+func server_disconnected():
+    lug.lug("client server_disconnected")
+    input.set_process(false)
 
 func network_peer_packet(id, packet):
+    # only read messages from server
+    if (id != 1): return
+    
     var player_messages = packet.get_string_from_ascii().split("|")
 
     var tick = int(player_messages[0])
@@ -105,29 +126,11 @@ func network_peer_packet(id, packet):
         get_tree().get_root().remove_child(players[disconnected_player])
         players.erase(disconnected_player)
 
-func get_input_speed_and_direction():
-    var speed = 0
-    var direction = -1
+func update_input(tick, speed, move_dir):
+    var message = "%s,%s,%s" % [tick, speed, move_dir]
     
-    var up = Input.is_key_pressed(KEY_W) || Input.is_key_pressed(KEY_UP)
-    var down = Input.is_key_pressed(KEY_S) || Input.is_key_pressed(KEY_DOWN)
-    var left = Input.is_key_pressed(KEY_A) || Input.is_key_pressed(KEY_LEFT)
-    var right = Input.is_key_pressed(KEY_D) || Input.is_key_pressed(KEY_RIGHT)
+    var result = get_tree().multiplayer.send_bytes(
+        message.to_ascii(), 1, NetworkedMultiplayerPeer.TRANSFER_MODE_UNRELIABLE)
 
-    if (up && !down):
-        if (left && !right): direction = 225
-        elif (right && !left): direction = 315
-        else: direction = 270
-    elif (down && !up):
-        if (left && !right): direction = 135
-        elif (right && !left): direction = 45
-        else: direction = 90
-    elif (left && !right): direction = 180
-    elif (right && !left): direction = 0
-
-    if (direction != -1):
-        speed = 1
-    else:
-        direction = 0
-
-    return "%s,%s" % [speed, deg2rad(direction)]
+    if (result != OK):
+        lug.lug("error on send_bytes in Client: %s" % result)
