@@ -55,5 +55,7 @@ func get_input_speed_and_direction():
     return {"speed": speed, "move_dir": deg2rad(direction)}
 
 func _unhandled_input(event):
-    if event is InputEventMouseMotion:
+    if (event is InputEventMouseMotion):
         listener.update_mouse(event.relative)
+    elif (event is InputEventKey && event.scancode == KEY_ESCAPE && event.is_pressed()):
+        Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)

@@ -6,6 +6,7 @@ var is_server = false
 
 func _ready():
     set_process(is_server)
+    Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
     lug.lug("Game ready")
 
 func _process(delta):
