@@ -1,6 +1,7 @@
 extends Node
 
 const SERVER_PORT = 1337
+const WEB_SOCKET_PORT = 1338
 const MAX_PLAYERS = 100
 
 const game_scene = preload("res://Game.tscn")
@@ -9,6 +10,10 @@ const input_scene = preload("res://Input.tscn")
 
 var delta_total = 0
 var tick_server = 1
+
+var ws_server = WebSocketServer.new()
+var wr_peer_connections = {}
+var webrtc = WebRTCMultiplayer.new()
 
 var game
 
@@ -35,8 +40,35 @@ func _ready():
     game.hide()
     game.is_server = true
     get_tree().get_root().add_child(game)
+    
+    
+    ws_server.listen(WEB_SOCKET_PORT)
+    ws_server.connect("client_connected", self, "ws_client_connected")
+    ws_server.connect("data_received", self, "ws_data_received")
+    
 
     lug.lug("Server Ready")
+    
+func ws_client_connected(ws_id, protocol):
+    lug.lug("ws_client_connected ws_id %s" % ws_id)
+
+func ws_data_received(ws_id):
+    lug.lug("ws_data_received ws_id %s" % ws_id)
+    var ws_peer = ws_server.get_peer(ws_id)
+    var message = ws_peer.get_packet().get_string_from_ascii()
+    if wr_peer_connections.has(ws_id):
+        return ws_handle_answer(wr_peer_connections[ws_id], ws_peer, message)
+    ws_handle_offer(ws_id, ws_peer, message)
+
+func ws_handle_offer(ws_id, ws_peer, message):
+    var wr_peer_connection = WebRTCPeerConnection.new()
+    var offer = wr_peer_connection.create_offer()
+    wr_peer_connections[ws_id] = wr_peer_connection
+    # no, this has to be a new node?
+    
+    
+func ws_handle_answer(wr_peer_connection, ws_peer, message):
+    pass
 
 func bulk_connect(signals):
     var bulk_result = OK
